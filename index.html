@@ -18,94 +18,97 @@
         .mirror { transform: scaleX(-1); }
     </style>
 </head>
-<body class="bg-indigo-950 text-white min-h-screen flex flex-col items-center justify-between p-4">
+<body class="bg-indigo-950 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Header -->
-    <header class="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center bg-indigo-900/80 backdrop-blur p-4 rounded-2xl shadow-lg border border-indigo-700 gap-4">
-        <div>
-            <h1 class="text-2xl font-extrabold text-yellow-400 flex items-center gap-2">
-                ✨ MotionFun Classroom <span class="text-xs bg-indigo-600 px-2 py-1 rounded-full text-indigo-200">Year 2-6</span>
-            </h1>
-            <p class="text-xs text-indigo-300">English & Bahasa Melayu Motion-Capture Learning Game</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <button id="langToggle" onclick="toggleLanguage()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-bold rounded-xl shadow transition transform active:scale-95 text-sm">
-                BM / English
-            </button>
-            <div class="bg-indigo-950 px-4 py-2 rounded-xl border border-indigo-700 text-center">
-                <span class="text-xs text-indigo-400 block">SCORE</span>
-                <span id="scoreVal" class="text-xl font-black text-green-400">0</span>
-            </div>
-        </div>
-    </header>
+    <!-- Outer Centered Wrapper Card -->
+    <div class="w-full max-w-3xl bg-indigo-900/40 border border-indigo-800/60 rounded-3xl p-6 shadow-2xl backdrop-blur-md flex flex-col gap-6">
 
-    <!-- Main Game Arena -->
-    <main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
-        
-        <!-- Left: Target Challenge Card -->
-        <div class="bg-indigo-900/90 border-2 border-indigo-700 rounded-3xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-10 -bottom-10 text-indigo-800/30 font-black text-9xl pointer-events-none select-none">🎯</div>
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-center bg-indigo-900/80 p-4 rounded-2xl shadow-inner border border-indigo-700/50 gap-4">
             <div>
-                <span id="categoryLabel" class="text-xs font-semibold uppercase tracking-wider bg-indigo-700 text-yellow-300 px-3 py-1 rounded-full">Action Verbs / Kata Kerja</span>
-                <div class="mt-6 text-center">
-                    <h2 id="targetWord" class="text-4xl md:text-5xl font-black text-white tracking-wide">JUMP</h2>
-                    <p id="targetTranslation" class="text-indigo-300 text-lg mt-2 font-medium">Lompat</p>
+                <h1 class="text-xl font-extrabold text-yellow-400 flex items-center gap-2">
+                    ✨ MotionFun Classroom <span class="text-xs bg-indigo-600 px-2 py-0.5 rounded-full text-indigo-200">Year 2-6</span>
+                </h1>
+                <p class="text-xs text-indigo-300">English & Bahasa Melayu Motion-Capture Learning Game</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="langToggle" onclick="toggleLanguage()" class="px-3.5 py-2 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-bold rounded-xl shadow transition transform active:scale-95 text-xs">
+                    BM / English
+                </button>
+                <div class="bg-indigo-950 px-3 py-1.5 rounded-xl border border-indigo-700 text-center">
+                    <span class="text-[10px] text-indigo-400 block tracking-wider">SCORE</span>
+                    <span id="scoreVal" class="text-lg font-black text-green-400">0</span>
                 </div>
             </div>
+        </header>
 
-            <div class="mt-6 bg-indigo-950/80 p-4 rounded-2xl border border-indigo-800">
-                <p class="text-xs text-indigo-400 font-semibold uppercase">Motion Instruction:</p>
-                <p id="targetGesture" class="text-sm text-yellow-200 mt-1 font-semibold">Raise hands up and simulate jumping motion!</p>
-            </div>
+        <!-- Main Game Arena Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            
+            <!-- Left: Target Challenge Card -->
+            <div class="bg-indigo-900/90 border border-indigo-700/60 rounded-2xl p-5 flex flex-col justify-between shadow-lg relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 text-indigo-800/20 font-black text-8xl pointer-events-none select-none">🎯</div>
+                <div>
+                    <span id="categoryLabel" class="text-[11px] font-semibold uppercase tracking-wider bg-indigo-700/80 text-yellow-300 px-3 py-1 rounded-full">Action Verbs / Kata Kerja</span>
+                    <div class="mt-4 text-center">
+                        <h2 id="targetWord" class="text-3xl font-black text-white tracking-wide">JUMP</h2>
+                        <p id="targetTranslation" class="text-indigo-300 text-sm mt-1 font-medium">Lompat</p>
+                    </div>
+                </div>
 
-            <button onclick="nextChallenge()" class="mt-6 w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">
-                Next Challenge ➡️
-            </button>
-        </div>
+                <div class="mt-4 bg-indigo-950/80 p-3.5 rounded-xl border border-indigo-800">
+                    <p class="text-[10px] text-indigo-400 font-semibold uppercase">Motion Instruction:</p>
+                    <p id="targetGesture" class="text-xs text-yellow-200 mt-1 font-semibold leading-relaxed">Raise hands up and simulate jumping motion!</p>
+                </div>
 
-        <!-- Right: Webcam & Computer Vision Feed -->
-        <div class="bg-indigo-900/90 border-2 border-indigo-700 rounded-3xl p-4 flex flex-col items-center justify-between shadow-2xl relative overflow-hidden">
-            <div class="w-full flex justify-between items-center mb-2 px-2">
-                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                    <span id="statusIndicator" class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> 
-                    <span id="statusText">Camera Off / Simulation Mode</span>
-                </span>
-                <button id="camToggleBtn" onclick="toggleCamera()" class="text-xs bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 rounded-lg font-semibold text-white transition">
-                    Start Camera
+                <button onclick="nextChallenge()" class="mt-5 w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow transition transform active:scale-95 text-sm">
+                    Next Challenge ➡️
                 </button>
             </div>
 
-            <!-- Video / Camera Screen -->
-            <div class="relative w-full aspect-4/3 bg-indigo-950 rounded-2xl overflow-hidden border border-indigo-800 flex items-center justify-center">
-                <video id="webcam" class="absolute inset-0 w-full h-full object-cover mirror hidden" autoplay playsinline></video>
-                <canvas id="output_canvas" class="absolute inset-0 w-full h-full object-cover mirror hidden"></canvas>
-                
-                <!-- Fallback / Simulation overlay -->
-                <div id="simOverlay" class="text-center p-6">
-                    <div class="text-5xl mb-2">📷</div>
-                    <p class="text-sm text-indigo-300 font-medium">Camera unavailable or embedded in iframe sandbox.</p>
-                    <p class="text-xs text-yellow-400 mt-1 font-semibold">Click below to simulate correct gesture for testing!</p>
-                    <button onclick="simulateSuccess()" class="mt-4 px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-extrabold rounded-xl text-sm shadow">
-                        ✨ Simulate Pupil Success!
+            <!-- Right: Webcam & Computer Vision Feed -->
+            <div class="bg-indigo-900/90 border border-indigo-700/60 rounded-2xl p-4 flex flex-col items-center justify-between shadow-lg relative overflow-hidden">
+                <div class="w-full flex justify-between items-center mb-2 px-1">
+                    <span class="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
+                        <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> 
+                        <span id="statusText">Camera Off / Simulation</span>
+                    </span>
+                    <button id="camToggleBtn" onclick="toggleCamera()" class="text-[11px] bg-indigo-700 hover:bg-indigo-600 px-2.5 py-1 rounded-lg font-semibold text-white transition">
+                        Start Camera
                     </button>
+                </div>
+
+                <!-- Video / Camera Screen (Fixed Aspect Ratio Container) -->
+                <div class="relative w-full h-44 bg-indigo-950 rounded-xl overflow-hidden border border-indigo-800 flex items-center justify-center">
+                    <video id="webcam" class="absolute inset-0 w-full h-full object-cover mirror hidden" autoplay playsinline></video>
+                    <canvas id="output_canvas" class="absolute inset-0 w-full h-full object-cover mirror hidden"></canvas>
+                    
+                    <!-- Fallback / Simulation overlay -->
+                    <div id="simOverlay" class="text-center p-4">
+                        <div class="text-3xl mb-1">📷</div>
+                        <p class="text-xs text-indigo-300 font-medium">Camera unavailable or iframe sandbox.</p>
+                        <button onclick="simulateSuccess()" class="mt-3 px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-extrabold rounded-lg text-xs shadow">
+                            ✨ Simulate Success!
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <p id="feedbackMsg" class="text-[11px] text-indigo-300 font-medium">Perform gesture in front of camera or test manually.</p>
                 </div>
             </div>
 
-            <div class="mt-3 text-center">
-                <p id="feedbackMsg" class="text-xs text-indigo-300 font-medium">Perform gesture in front of camera or use simulation mode.</p>
-            </div>
-        </div>
+        </main>
 
-    </main>
+        <!-- Footer -->
+        <footer class="text-center text-[10px] text-indigo-400/60 pt-1 border-t border-indigo-800/40">
+            Primary School Interactive English & Bahasa Melayu Motion App
+        </footer>
 
-    <!-- Footer -->
-    <footer class="text-center text-xs text-indigo-400/70">
-        Primary School Interactive English & Bahasa Melayu Motion App • Built for Pupils
-    </footer>
+    </div>
 
     <!-- Application Script -->
     <script>
-        // Challenge Data Bank (Bilingual)
         const challenges = [
             { en: "JUMP", bm: "LOMPAT", category: "Action Verbs / Kata Kerja", gesture: "Raise hands up and jump!" },
             { en: "HUGE", bm: "TINGGI / BESAR", category: "Adjectives / Kata Adjektif", gesture: "Stretch arms wide open above head." },
@@ -143,24 +146,22 @@
             score += 10;
             document.getElementById('scoreVal').innerText = score;
             document.getElementById('feedbackMsg').innerText = "🎉 Brilliant! Correct Motion Detected!";
-            document.getElementById('feedbackMsg').className = "text-xs text-green-400 font-bold animate-pulse";
+            document.getElementById('feedbackMsg').className = "text-[11px] text-green-400 font-bold animate-pulse";
             
-            // Trigger confetti
             confetti({
-                particleCount: 80,
-                spread: 70,
+                particleCount: 60,
+                spread: 60,
                 origin: { y: 0.6 }
             });
             playAudioNote(800, 0.2);
 
             setTimeout(() => {
-                document.getElementById('feedbackMsg').innerText = "Perform gesture in front of camera or use simulation mode.";
-                document.getElementById('feedbackMsg').className = "text-xs text-indigo-300 font-medium";
+                document.getElementById('feedbackMsg').innerText = "Perform gesture in front of camera or test manually.";
+                document.getElementById('feedbackMsg').className = "text-[11px] text-indigo-300 font-medium";
                 nextChallenge();
             }, 1500);
         }
 
-        // Web Audio Sound Generator (No external mp3 files needed)
         function playAudioNote(frequency, duration) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -174,12 +175,9 @@
                 gain.connect(audioCtx.destination);
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {
-                // Audio context not allowed until user interaction
-            }
+            } catch (e) {}
         }
 
-        // Camera & MediaPipe Initialization with Error Catching
         async function toggleCamera() {
             const videoElement = document.getElementById('webcam');
             const canvasElement = document.getElementById('output_canvas');
@@ -190,19 +188,18 @@
 
             if (!cameraActive) {
                 try {
-                    statusText.innerText = "Requesting Camera...";
+                    statusText.innerText = "Requesting...";
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
                     videoElement.srcObject = stream;
                     videoElement.classList.remove('hidden');
                     canvasElement.classList.remove('hidden');
                     simOverlay.classList.add('hidden');
                     
-                    statusIndicator.className = "w-3 h-3 rounded-full bg-green-500 inline-block animate-ping";
-                    statusText.innerText = "Camera Active & Tracking";
-                    camToggleBtn.innerText = "Stop Camera";
+                    statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-green-500 inline-block animate-ping";
+                    statusText.innerText = "Camera Active";
+                    camToggleBtn.innerText = "Stop";
                     cameraActive = true;
 
-                    // Initialize MediaPipe Hands if available
                     if (typeof Hands !== 'undefined') {
                         const hands = new Hands({
                             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -210,7 +207,6 @@
                         hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6 });
                         hands.onResults((results) => {
                             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                                // Hand detected! Auto trigger score increment occasionally
                                 simulateSuccess();
                             }
                         });
@@ -225,17 +221,15 @@
                         camera.start();
                     }
                 } catch (err) {
-                    console.warn("Webcam blocked or unavailable:", err);
-                    statusIndicator.className = "w-3 h-3 rounded-full bg-red-500 inline-block";
-                    statusText.innerText = "Camera Blocked (Iframe Sandbox)";
-                    alert("Webcam is disabled or unavailable because Google Sites restricts camera permissions inside embedded iframes. Use Simulation Mode below or host the app externally!");
+                    statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-500 inline-block";
+                    statusText.innerText = "Camera Blocked";
+                    alert("Webcam is unavailable inside embedded frames. Use the simulation button or open the link directly!");
                 }
             } else {
                 window.location.reload();
             }
         }
 
-        // Initialize Display on Load
         updateChallengeDisplay();
     </script>
 </body>
