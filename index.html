@@ -61,7 +61,7 @@
                     <p id="targetGesture" class="text-xs text-yellow-200 mt-1 font-semibold leading-relaxed">Raise hands up and simulate jumping motion!</p>
                 </div>
 
-                <button onclick="nextChallenge()" class="mt-5 w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow transition transform active:scale-95 text-sm">
+                <button onclick="nextChallenge()" class="mt-5 w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow transition transform active:scale-95 text-sm cursor-pointer">
                     Next Challenge ➡️
                 </button>
             </div>
@@ -71,30 +71,33 @@
                 <div class="w-full flex justify-between items-center mb-2 px-1">
                     <span class="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
                         <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> 
-                        <span id="statusText">Camera Off / Simulation</span>
+                        <span id="statusText">Camera Off</span>
                     </span>
-                    <button id="camToggleBtn" onclick="toggleCamera()" class="text-[11px] bg-indigo-700 hover:bg-indigo-600 px-2.5 py-1 rounded-lg font-semibold text-white transition">
+                    <button id="camToggleBtn" onclick="toggleCamera()" class="text-[11px] bg-indigo-700 hover:bg-indigo-600 px-2.5 py-1 rounded-lg font-semibold text-white transition cursor-pointer">
                         Start Camera
                     </button>
                 </div>
 
-                <!-- Video / Camera Screen (Fixed Aspect Ratio Container) -->
-                <div class="relative w-full h-44 bg-indigo-950 rounded-xl overflow-hidden border border-indigo-800 flex items-center justify-center">
+                <!-- Video / Camera Screen (Clickable backup trigger) -->
+                <div id="cameraContainer" onclick="simulateSuccess()" title="Click here if gesture doesn't auto-trigger!" class="relative w-full h-44 bg-indigo-950 rounded-xl overflow-hidden border border-indigo-800 flex items-center justify-center cursor-pointer group">
                     <video id="webcam" class="absolute inset-0 w-full h-full object-cover mirror hidden" autoplay playsinline></video>
                     <canvas id="output_canvas" class="absolute inset-0 w-full h-full object-cover mirror hidden"></canvas>
                     
+                    <!-- Hover hint overlay for teacher/pupils -->
+                    <div id="cameraHint" class="absolute inset-0 bg-indigo-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-center p-2">
+                        <span class="text-xs text-yellow-300 font-bold bg-indigo-900/90 px-3 py-1.5 rounded-lg shadow">✨ Click here to score success!</span>
+                    </div>
+
                     <!-- Fallback / Simulation overlay -->
                     <div id="simOverlay" class="text-center p-4">
                         <div class="text-3xl mb-1">📷</div>
-                        <p class="text-xs text-indigo-300 font-medium">Camera unavailable or iframe sandbox.</p>
-                        <button onclick="simulateSuccess()" class="mt-3 px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-extrabold rounded-lg text-xs shadow">
-                            ✨ Simulate Success!
-                        </button>
+                        <p class="text-xs text-indigo-300 font-medium">Click Start Camera above.</p>
+                        <p class="text-[10px] text-yellow-400 mt-1">Tap this box anytime to award points!</p>
                     </div>
                 </div>
 
                 <div class="mt-3 text-center">
-                    <p id="feedbackMsg" class="text-[11px] text-indigo-300 font-medium">Perform gesture in front of camera or test manually.</p>
+                    <p id="feedbackMsg" class="text-[11px] text-indigo-300 font-medium">Perform gesture or tap camera box to score.</p>
                 </div>
             </div>
 
@@ -122,6 +125,7 @@
         let isEnglishMode = true;
         let cameraActive = false;
         let camera = null;
+        let lastTriggerTime = 0;
 
         function updateChallengeDisplay() {
             const current = challenges[currentIndex];
@@ -143,9 +147,14 @@
         }
 
         function simulateSuccess() {
+            // Prevent rapid double-triggering
+            const now = Date.now();
+            if (now - lastTriggerTime < 2000) return;
+            lastTriggerTime = now;
+
             score += 10;
             document.getElementById('scoreVal').innerText = score;
-            document.getElementById('feedbackMsg').innerText = "🎉 Brilliant! Correct Motion Detected!";
+            document.getElementById('feedbackMsg').innerText = "🎉 Brilliant! Correct Motion Recorded!";
             document.getElementById('feedbackMsg').className = "text-[11px] text-green-400 font-bold animate-pulse";
             
             confetti({
@@ -156,7 +165,7 @@
             playAudioNote(800, 0.2);
 
             setTimeout(() => {
-                document.getElementById('feedbackMsg').innerText = "Perform gesture in front of camera or test manually.";
+                document.getElementById('feedbackMsg').innerText = "Perform gesture or tap camera box to score.";
                 document.getElementById('feedbackMsg').className = "text-[11px] text-indigo-300 font-medium";
                 nextChallenge();
             }, 1500);
@@ -204,7 +213,8 @@
                         const hands = new Hands({
                             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
                         });
-                        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6 });
+                        // Optimized for easier classroom detection
+                        hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.4, minTrackingConfidence: 0.4 });
                         hands.onResults((results) => {
                             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                                 simulateSuccess();
@@ -223,7 +233,7 @@
                 } catch (err) {
                     statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-500 inline-block";
                     statusText.innerText = "Camera Blocked";
-                    alert("Webcam is unavailable inside embedded frames. Use the simulation button or open the link directly!");
+                    alert("Camera permission denied. You can still use the tap-to-score feature by clicking the camera box!");
                 }
             } else {
                 window.location.reload();
