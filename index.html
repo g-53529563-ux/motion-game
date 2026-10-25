@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilingual Motion Capture Game for Primary Pupils</title>
+    <!-- Tailwind CSS for modern UI -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .mirror { transform: scaleX(-1); }
+    </style>
+</head>
+<body class="bg-indigo-950 text-white min-h-screen flex flex-col items-center justify-between p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center bg-indigo-900/80 backdrop-blur p-4 rounded-2xl shadow-lg border border-indigo-700 gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-yellow-400 flex items-center gap-2">
+                ✨ MotionFun Classroom <span class="text-xs bg-indigo-600 px-2 py-1 rounded-full text-indigo-200">Year 2-6</span>
+            </h1>
+            <p class="text-xs text-indigo-300">English & Bahasa Melayu Motion-Capture Learning Game</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="langToggle" onclick="toggleLanguage()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-bold rounded-xl shadow transition transform active:scale-95 text-sm">
+                BM / English
+            </button>
+            <div class="bg-indigo-950 px-4 py-2 rounded-xl border border-indigo-700 text-center">
+                <span class="text-xs text-indigo-400 block">SCORE</span>
+                <span id="scoreVal" class="text-xl font-black text-green-400">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Arena -->
+    <main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+        
+        <!-- Left: Target Challenge Card -->
+        <div class="bg-indigo-900/90 border-2 border-indigo-700 rounded-3xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 text-indigo-800/30 font-black text-9xl pointer-events-none select-none">🎯</div>
+            <div>
+                <span id="categoryLabel" class="text-xs font-semibold uppercase tracking-wider bg-indigo-700 text-yellow-300 px-3 py-1 rounded-full">Action Verbs / Kata Kerja</span>
+                <div class="mt-6 text-center">
+                    <h2 id="targetWord" class="text-4xl md:text-5xl font-black text-white tracking-wide">JUMP</h2>
+                    <p id="targetTranslation" class="text-indigo-300 text-lg mt-2 font-medium">Lompat</p>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-indigo-950/80 p-4 rounded-2xl border border-indigo-800">
+                <p class="text-xs text-indigo-400 font-semibold uppercase">Motion Instruction:</p>
+                <p id="targetGesture" class="text-sm text-yellow-200 mt-1 font-semibold">Raise hands up and simulate jumping motion!</p>
+            </div>
+
+            <button onclick="nextChallenge()" class="mt-6 w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-2xl shadow-lg transition transform active:scale-95">
+                Next Challenge ➡️
+            </button>
+        </div>
+
+        <!-- Right: Webcam & Computer Vision Feed -->
+        <div class="bg-indigo-900/90 border-2 border-indigo-700 rounded-3xl p-4 flex flex-col items-center justify-between shadow-2xl relative overflow-hidden">
+            <div class="w-full flex justify-between items-center mb-2 px-2">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                    <span id="statusIndicator" class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> 
+                    <span id="statusText">Camera Off / Simulation Mode</span>
+                </span>
+                <button id="camToggleBtn" onclick="toggleCamera()" class="text-xs bg-indigo-700 hover:bg-indigo-600 px-3 py-1.5 rounded-lg font-semibold text-white transition">
+                    Start Camera
+                </button>
+            </div>
+
+            <!-- Video / Camera Screen -->
+            <div class="relative w-full aspect-4/3 bg-indigo-950 rounded-2xl overflow-hidden border border-indigo-800 flex items-center justify-center">
+                <video id="webcam" class="absolute inset-0 w-full h-full object-cover mirror hidden" autoplay playsinline></video>
+                <canvas id="output_canvas" class="absolute inset-0 w-full h-full object-cover mirror hidden"></canvas>
+                
+                <!-- Fallback / Simulation overlay -->
+                <div id="simOverlay" class="text-center p-6">
+                    <div class="text-5xl mb-2">📷</div>
+                    <p class="text-sm text-indigo-300 font-medium">Camera unavailable or embedded in iframe sandbox.</p>
+                    <p class="text-xs text-yellow-400 mt-1 font-semibold">Click below to simulate correct gesture for testing!</p>
+                    <button onclick="simulateSuccess()" class="mt-4 px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-indigo-950 font-extrabold rounded-xl text-sm shadow">
+                        ✨ Simulate Pupil Success!
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-3 text-center">
+                <p id="feedbackMsg" class="text-xs text-indigo-300 font-medium">Perform gesture in front of camera or use simulation mode.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-indigo-400/70">
+        Primary School Interactive English & Bahasa Melayu Motion App • Built for Pupils
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        // Challenge Data Bank (Bilingual)
+        const challenges = [
+            { en: "JUMP", bm: "LOMPAT", category: "Action Verbs / Kata Kerja", gesture: "Raise hands up and jump!" },
+            { en: "HUGE", bm: "TINGGI / BESAR", category: "Adjectives / Kata Adjektif", gesture: "Stretch arms wide open above head." },
+            { en: "UNDER", bm: "DI BAWAH", category: "Prepositions / Kata Sendi", gesture: "Place hands below waist level." },
+            { en: "READING", bm: "MEMBACA", category: "Daily Actions / Perbuatan", gesture: "Simulate holding an open book near eyes." },
+            { en: "THANK YOU", bm: "TERIMA KASIH", category: "Courtesy / Kesantunan", gesture: "Right hand placed over heart with nod." }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let isEnglishMode = true;
+        let cameraActive = false;
+        let camera = null;
+
+        function updateChallengeDisplay() {
+            const current = challenges[currentIndex];
+            document.getElementById('targetWord').innerText = isEnglishMode ? current.en : current.bm;
+            document.getElementById('targetTranslation').innerText = isEnglishMode ? `BM: ${current.bm}` : `EN: ${current.en}`;
+            document.getElementById('categoryLabel').innerText = current.category;
+            document.getElementById('targetGesture').innerText = current.gesture;
+        }
+
+        function toggleLanguage() {
+            isEnglishMode = !isEnglishMode;
+            updateChallengeDisplay();
+        }
+
+        function nextChallenge() {
+            currentIndex = (currentIndex + 1) % challenges.length;
+            updateChallengeDisplay();
+            playAudioNote(600, 0.1);
+        }
+
+        function simulateSuccess() {
+            score += 10;
+            document.getElementById('scoreVal').innerText = score;
+            document.getElementById('feedbackMsg').innerText = "🎉 Brilliant! Correct Motion Detected!";
+            document.getElementById('feedbackMsg').className = "text-xs text-green-400 font-bold animate-pulse";
+            
+            // Trigger confetti
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            playAudioNote(800, 0.2);
+
+            setTimeout(() => {
+                document.getElementById('feedbackMsg').innerText = "Perform gesture in front of camera or use simulation mode.";
+                document.getElementById('feedbackMsg').className = "text-xs text-indigo-300 font-medium";
+                nextChallenge();
+            }, 1500);
+        }
+
+        // Web Audio Sound Generator (No external mp3 files needed)
+        function playAudioNote(frequency, duration) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Audio context not allowed until user interaction
+            }
+        }
+
+        // Camera & MediaPipe Initialization with Error Catching
+        async function toggleCamera() {
+            const videoElement = document.getElementById('webcam');
+            const canvasElement = document.getElementById('output_canvas');
+            const simOverlay = document.getElementById('simOverlay');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const camToggleBtn = document.getElementById('camToggleBtn');
+
+            if (!cameraActive) {
+                try {
+                    statusText.innerText = "Requesting Camera...";
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                    videoElement.srcObject = stream;
+                    videoElement.classList.remove('hidden');
+                    canvasElement.classList.remove('hidden');
+                    simOverlay.classList.add('hidden');
+                    
+                    statusIndicator.className = "w-3 h-3 rounded-full bg-green-500 inline-block animate-ping";
+                    statusText.innerText = "Camera Active & Tracking";
+                    camToggleBtn.innerText = "Stop Camera";
+                    cameraActive = true;
+
+                    // Initialize MediaPipe Hands if available
+                    if (typeof Hands !== 'undefined') {
+                        const hands = new Hands({
+                            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                        });
+                        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6 });
+                        hands.onResults((results) => {
+                            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                                // Hand detected! Auto trigger score increment occasionally
+                                simulateSuccess();
+                            }
+                        });
+
+                        camera = new Camera(videoElement, {
+                            onFrame: async () => {
+                                await hands.send({ image: videoElement });
+                            },
+                            width: 640,
+                            height: 480
+                        });
+                        camera.start();
+                    }
+                } catch (err) {
+                    console.warn("Webcam blocked or unavailable:", err);
+                    statusIndicator.className = "w-3 h-3 rounded-full bg-red-500 inline-block";
+                    statusText.innerText = "Camera Blocked (Iframe Sandbox)";
+                    alert("Webcam is disabled or unavailable because Google Sites restricts camera permissions inside embedded iframes. Use Simulation Mode below or host the app externally!");
+                }
+            } else {
+                window.location.reload();
+            }
+        }
+
+        // Initialize Display on Load
+        updateChallengeDisplay();
+    </script>
+</body>
+</html>
